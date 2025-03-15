@@ -7,6 +7,8 @@ services:
       dockerfile: ./docker/Dockerfile-gzsim
       args:
         ROS_DISTRO: humble
+        ARCH: amd64
+        UBUNTU: jammy
         GZ_VERSION: harmonic
     environment: 
       - PYTHONUNBUFFERED=1 # important to show error messages if a ros service crashes!

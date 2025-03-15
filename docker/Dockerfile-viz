@@ -1,5 +1,5 @@
 ARG ROS_DISTRO
-FROM ros:${ROS_DISTRO}
+FROM brean/kobuki-base:${ROS_DISTRO}_amd64_001
 
 ENV COLCON_WS=/root/colcon_ws
 ENV COLCON_WS_SRC=/root/colcon_ws/src
@@ -7,9 +7,6 @@ ENV PYTHONWARNINGS="ignore:setup.py install is deprecated::setuptools.command.in
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# TODO: install kobuki-packages
-
-# TODO: move ros-${ROS_DISTRO}-rviz2 to own docker file, so we run ros2 separately
 RUN apt-get update -qq \
   && apt-get install -y \
     ros-${ROS_DISTRO}-rviz2 \

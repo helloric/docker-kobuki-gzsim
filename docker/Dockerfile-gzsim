@@ -5,11 +5,43 @@ FROM brean/gz_sim:${GZ_VERSION}-${ROS_DISTRO}
 
 ENV COLCON_WS=/root/colcon_ws
 ENV COLCON_WS_SRC=/root/colcon_ws/src
+ENV PYTHONWARNINGS="ignore:setup.py install is deprecated::setuptools.command.install"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# install all dependencies
+RUN apt-get update \ 
+  && apt-get install -y \
+    udev \
+    wget \
+    unzip \
+    ros-${ROS_DISTRO}-kobuki-ros-interfaces \
+    ros-${ROS_DISTRO}-kobuki-velocity-smoother \
+    ros-${ROS_DISTRO}-kobuki-core \
+    ros-${ROS_DISTRO}-ros2test \
+    ros-${ROS_DISTRO}-ros-testing \
+    ros-${ROS_DISTRO}-angles \
+    ros-${ROS_DISTRO}-diagnostic-updater \
+    ros-${ROS_DISTRO}-xacro \
+    ros-${ROS_DISTRO}-joint-state-publisher \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR ${COLCON_WS}
+
+ARG ARCH
+ARG UBUNTU
+
+# install kobuki-images (only kobuki-description is really needed but we install
+# everything for future experiments)
+RUN mkdir /tmp/debs/ \
+  && cd /tmp/debs/ \
+  && wget https://github.com/helloric/docker-kobuki-compile/releases/download/kobuki-ros-1.0.0-0/ros-${ROS_DISTRO}-kobuki-ros-1.0.0-0${UBUNTU}_${ARCH}.zip \
+  && unzip ros-${ROS_DISTRO}-kobuki-ros-1.0.0-0${UBUNTU}_${ARCH}.zip \
+  && dpkg -i *.deb \
+  && rm -Rf /tmp/debs/
 
 COPY ./kobuki_gzsim ${COLCON_WS_SRC}/kobuki_gzsim
-
-# TODO: copy kobuki_descritpion so gazebo can find the models from the 
-# COPY ./kobuki_description ${COLCON_WS_SRC}/kobuki_description
 
 COPY ./docker/entrypoint.bash /ros_entrypoint.bash
 RUN chmod +x /ros_entrypoint.bash
