@@ -1,0 +1,3 @@
+[submodule "kobuki_gzsim"]
+	path = kobuki_gzsim
+	url = git@github.com:helloric/kobuki_gzsim.git

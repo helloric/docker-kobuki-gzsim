@@ -1,0 +1,43 @@
+services:
+  gz_sim:
+    # gazebo installation for the robot
+    image: brean/kobuki-gz_sim:humble_harmonic_amd64_001
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile-gzsim
+      args:
+        ROS_DISTRO: humble
+        GZ_VERSION: harmonic
+    environment: 
+      - PYTHONUNBUFFERED=1 # important to show error messages if a ros service crashes!
+      - DISPLAY # for UI
+      - QT_X11_NO_MITSHM=1 #fix some QT bugs
+      - NVIDIA_VISIBLE_DEVICES=all # for docker-nvidia2
+      - NVIDIA_DRIVER_CAPABILITIES=all # for docker-nvidia2
+      - XDG_RUNTIME_DIR 
+      - XAUTHORITY=$XAUTHORITY
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw  # for UI
+      - ./roslogs/gz_sim:/root/.ros:z
+    privileged: true  # for UI
+
+  viz:
+    # run visual tools (like rviz)
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile-viz
+      args:
+        ROS_DISTRO: humble
+    image: brean/kobuki-viz:humble_amd64_001
+    environment: 
+      - PYTHONUNBUFFERED=1 # important to show error messages if a ros service crashes!
+      - DISPLAY # for UI
+      - QT_X11_NO_MITSHM=1 #fix some QT bugs
+      - NVIDIA_VISIBLE_DEVICES=all # for docker-nvidia2
+      - NVIDIA_DRIVER_CAPABILITIES=all # for docker-nvidia2
+      - XDG_RUNTIME_DIR
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw  # for UI
+      - ./roslogs/viz:/root/.ros:z
+    # command: [ ros2, launch, , viz_tools.launch.py ]
+    privileged: true  # for UI

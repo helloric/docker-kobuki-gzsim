@@ -1,0 +1,22 @@
+ARG ROS_DISTRO
+ARG GZ_VERSION
+FROM brean/gz_sim:${GZ_VERSION}-${ROS_DISTRO}
+# see https://github.com/brean/gz-sim-docker
+
+ENV COLCON_WS=/root/colcon_ws
+ENV COLCON_WS_SRC=/root/colcon_ws/src
+
+COPY ./kobuki_gzsim ${COLCON_WS_SRC}/kobuki_gzsim
+
+# TODO: copy kobuki_descritpion so gazebo can find the models from the 
+# COPY ./kobuki_description ${COLCON_WS_SRC}/kobuki_description
+
+COPY ./docker/entrypoint.bash /ros_entrypoint.bash
+RUN chmod +x /ros_entrypoint.bash
+ENTRYPOINT ["/ros_entrypoint.bash"]
+
+WORKDIR ${COLCON_WS}
+RUN . ${COLCON_WS}/install/setup.sh\
+  && colcon build
+
+CMD ros2 launch kobuki_gzsim kobuki_sim.launch.py

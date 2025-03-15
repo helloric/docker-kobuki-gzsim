@@ -1,0 +1,27 @@
+ARG ROS_DISTRO
+FROM ros:${ROS_DISTRO}
+
+ENV COLCON_WS=/root/colcon_ws
+ENV COLCON_WS_SRC=/root/colcon_ws/src
+ENV PYTHONWARNINGS="ignore:setup.py install is deprecated::setuptools.command.install"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# TODO: install kobuki-packages
+
+# TODO: move ros-${ROS_DISTRO}-rviz2 to own docker file, so we run ros2 separately
+RUN apt-get update -qq \
+  && apt-get install -y \
+    ros-${ROS_DISTRO}-rviz2 \
+    ros-${ROS_DISTRO}-rqt-robot-steering \
+  && rm -rf /var/lib/apt/lists/*
+
+WORKDIR ${COLCON_WS}
+
+COPY ./docker/entrypoint.bash /ros_entrypoint.bash
+RUN chmod +x /ros_entrypoint.bash
+ENTRYPOINT ["/ros_entrypoint.bash"]
+
+RUN cd ${COLCON_WS}\
+  && . /opt/ros/${ROS_DISTRO}/setup.sh\
+  && colcon build
